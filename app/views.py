@@ -1,5 +1,5 @@
 from aiohttp.hdrs import METH_POST
-from aiohttp.web import json_response
+from aiohttp.web import json_response, Response
 from aiohttp.web_exceptions import HTTPFound
 from aiohttp_jinja2 import template
 
@@ -15,5 +15,5 @@ async def index(request):
 
 async def query(request):
     mql = request.app['mql']
-    data = await mql.execute('SELECT id, name FROM test')
-    return json_response(data)
+    data = await mql.execute('SELECT id, name, _a FROM public.test ORDER BY name')
+    return Response(text=data, content_type='application/json')
