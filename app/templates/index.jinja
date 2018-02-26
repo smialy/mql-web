@@ -1,7 +1,12 @@
 {% extends 'base.jinja' %}
 
 {% block content %}
+    <div id="queries"></div>
     <form>
-
+        <textarea cols="50" rows="10" class="query"></textarea>
+        <textarea cols="50" rows="10" class="params"></textarea>
+        <div>
+            <button type="submit">Send</button>
+        </div>
     </form>
 {% endblock %}

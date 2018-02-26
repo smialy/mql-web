@@ -47,8 +47,9 @@ def static_url(context, static_file_path):
 
 async def startup(app: web.Application):
     # app['pg_engine'] = await create_engine(pg_dsn(app['settings']), loop=app.loop)
-    dsn = 'postgresql://postgres:postgres@localhost/mql'
+    dsn = 'postgresql://cube:cube123@localhost/cube'
     app['mql'] = await create_engine(dsn)
+
 
 async def cleanup(app: web.Application):
     pass
@@ -58,7 +59,7 @@ async def cleanup(app: web.Application):
 
 def setup_routes(app):
     app.router.add_get('/', views.index, name='index')
-    app.router.add_get('/query', views.query, name='message-data')
+    app.router.add_route('*', '/query', views.QueryView, name='query')
 
 
 def create_app(loop):

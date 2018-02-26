@@ -1,29 +1,11 @@
 import aiopg
+import asyncpg
+
 from mql.mql import Mql
 from mql.common import ast
 from mql.common.traverse import NodeTransformer
-from mql.parser.parser import expression
-from mql.engines import psql
-
-
-class AclTransformer(NodeTransformer):
-    def visit_SelectStatement(self, node):
-        acl = expression('s_owner = 1 AND s_unixperms = 256 OR s_group = 1 AND s_unixperms = 32 OR s_unixperms & 4 = 4')
-        if node.where:
-            node.where.condition = ast.LogicExpression(
-                'and',
-                acl,
-                node.where.condition
-            )
-        else:
-            node.where = ast.SelectWhere(acl)
-
-        if node.results[0].is_wildcard():
-            node.results = [ast.SelectIdentifier("")]
-        else:
-            node.results = [item for item in node.results if not item.name.startswith('_')]
-
-        return node
+from mql.common.source import Source
+from mql.execution import psql
 
 
 class LimitTransformer(NodeTransformer):
@@ -33,13 +15,33 @@ class LimitTransformer(NodeTransformer):
         return node
 
 
-async def create_engine(dsn):
+async def create_engine(dsn, db_name='cube'):
     pool = await aiopg.create_pool(dsn)
-    engine = psql.create_engine(pool)
+    connection = psql.AiopgConnection(pool)
 
-    engine.add_transformer(AclTransformer())
-    engine.add_transformer(LimitTransformer())
+    # import json
+    # pool = await asyncpg.create_pool(dsn)
+    # async with pool.acquire() as connection:
+    #     await connection.set_type_codec(
+    #             'json',
+    #             encoder=json.dumps,
+    #             decoder=json.loads,
+    #             schema='pg_catalog'
+    #         )
+    # connection = psql.AsyncpgConnection(pool)
 
-    schema = await engine.load_schema()
-    return Mql(engine, schema)
-    # data = await mql.execute('SELECT name FROM test WHERE id = 1')
+    engine = psql.PgsqlEngine(connection)
+    schema = await engine.load_schema(db_name)
+    # source = None
+    # print(schema.serialize())
+    source = Source(db_name, engine, schema)
+    # executor = Executor(db_name, engine)
+    mql = Mql(
+        default_source=db_name,
+        sources=[source]
+    )
+
+    mql.add_transformer(LimitTransformer())
+    return mql
+
+

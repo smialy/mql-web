@@ -19,9 +19,9 @@ class Settings:
     Or, passing the custom setting as a keyword argument when initialising settings (useful when testing)
     """
     _ENV_PREFIX = 'APP_'
-    DB_NAME = 'aio'
-    DB_USER = 'postgres'
-    DB_PASSWORD = 'postgres'
+    DB_NAME = 'cube'
+    DB_USER = 'cube'
+    DB_PASSWORD = 'cube123'
     DB_HOST = 'localhost'
     DB_PORT = '5432'
 

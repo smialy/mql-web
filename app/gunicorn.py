@@ -10,8 +10,10 @@ To run the app using gunicorn, in the terminal run
 You could use a variant of the above with heroku (in the `Procfile`) or with Docker in the ENTRYPOINT statement.
 """
 import asyncio
-
+import uvloop
 from .main import create_app
 
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 loop = asyncio.get_event_loop()
 app = create_app(loop)
