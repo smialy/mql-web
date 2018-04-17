@@ -58,8 +58,8 @@ def format_result(result):
     return False, response
 
 
-def encode_result(result, encode=json_response):
+def encode_result(result, encoder=json.dumps):
     encoded, response = format_result(result)
-    if encoded:
-        return Response(text=response, content_type='application/json')
-    return encode(response)
+    if not encoded:
+        response = encoder(response)
+    return Response(text=response, content_type='application/json')
